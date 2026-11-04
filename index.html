@@ -1499,7 +1499,7 @@
     /* Hidden Anchor Title (Dead-Center Reference for Letter Ghosts) */
     .s-work .s__title,
     .s-work .s__scene {
-      font: 700 min(13.5rem, 16.5vh) / 0.92 var(--font-family-bigger);
+      font: 700 min(18.75rem, 25vh) / 1 var(--font-family-bigger);
       text-align: center;
       text-transform: uppercase;
       letter-spacing: -0.01em;
@@ -1507,7 +1507,7 @@
 
     .s-work .s__title__inner,
     .s-work .s__scene__letter {
-      line-height: 0.88;
+      line-height: 0.85;
     }
 
     .s-work .s__title {
@@ -1515,9 +1515,10 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: auto;
+      width: 0.7em;
       opacity: 0;
       pointer-events: none;
+      word-break: break-all;
       z-index: 0;
     }
 
@@ -1557,12 +1558,20 @@
                              calc(var(--iy) * 50% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
-      text-shadow: 2px 2px 0 var(--color-shadow);
     }
 
-    /* 3D Extrusion Layer behind each Letter (Optimized for 60fps) */
+    /* 3D Extrusion Layer behind each Letter (Authentic Wodniack Dimensional Bevel) */
     .s-work .s__scene .s__scene__letter::before {
-      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      color: var(--color-shadow);
+      opacity: min(calc(var(--state) * 2), 1);
+      transform: scale(1.05, 1.02) translate3d(calc(var(--head) * 0.15rem * var(--state) * var(--state)), 0, 0);
+      transform-origin: calc(50% - var(--head) * 50%) -50%;
+      will-change: opacity, transform;
+      content: attr(data-letter);
     }
 
     /* 3D Orbiting Work Cards (<a-work>) */
@@ -3078,9 +3087,9 @@
         t.svg.style.width = t.width + "px";
         t.svg.style.height = t.height + "px";
 
-        // Authentic sleek stadium capsule (proportional & balanced)
-        const n = Math.min(Math.max(e * 0.19, 250), 320);
-        const o = Math.min(Math.max(i * 0.70, 480), 560);
+        // Authentic Wodniack stadium capsule
+        const n = Math.min(Math.max(e * 0.18, 250), 320);
+        const o = Math.min(Math.max(i * 0.78, 520), 620);
         const a = (e - n) / 2;
         const l = (i - o) / 2;
 
@@ -3140,14 +3149,14 @@
           i.ghosts = [];
 
           const r = i.el.getBoundingClientRect();
-          i.width = r.width || (window.innerWidth * 0.12);
-          i.height = r.height || (window.innerHeight * 0.2);
+          i.width = r.width || (window.innerWidth * 0.1);
+          i.height = r.height || (window.innerHeight * 0.25);
           i.top = r.top - containerRect.top;
           i.left = r.left - containerRect.left;
           i.freq = 1.0 + (s * 0.12);
 
-          const n = window.innerWidth > 767 ? 0.65 : 0.45;
-          i.total = Math.max(7, Math.round(this.bounding.width / i.width * n));
+          const n = window.innerWidth > 767 ? 1.05 : 0.75;
+          i.total = Math.round(this.bounding.width / i.width * n) + 2;
 
           for (let o = 0; o < i.total; o++) {
             const a = document.createElement("span");
@@ -3253,86 +3262,42 @@
       }
 
       setPoints() {
-        this.stars = [];
-        const w = this.bounding.width;
-        const h = this.bounding.height;
-        const count = window.innerWidth > 767 ? 260 : 140;
-        const cx = w * 0.5;
-        const cy = h * 0.5;
+        this.points = [];
+        const e = 24;
+        const i = Math.ceil(this.bounding.width * 1.2 / e);
+        const s = Math.ceil(this.bounding.height * 1.2 / e);
+        const r = (this.bounding.width - i * e) * 0.5;
+        const n = (this.bounding.height - s * e) * 0.5;
+        const o = this.bounding.width * 0.5;
+        const a = this.bounding.height * 0.5;
 
-        for (let i = 0; i < count; i++) {
-          const x = Math.random() * w;
-          const y = Math.random() * h;
-          const isCross = Math.random() < 0.14;
-          const r = isCross ? (2.2 + Math.random() * 2.2) : (0.9 + Math.random() * 1.6);
-          const baseAlpha = 0.35 + Math.random() * 0.65;
-          const speed = 0.015 + Math.random() * 0.035;
-          const phase = Math.random() * Math.PI * 2;
-          const driftSpeed = (0.2 + Math.random() * 0.6) * (Math.random() > 0.5 ? 1 : -1);
-
-          this.stars.push({
-            x,
-            y,
-            origX: x,
-            origY: y,
-            dx: cx - x,
-            dy: cy - y,
-            r,
-            isCross,
-            baseAlpha,
-            speed,
-            phase,
-            driftSpeed,
-            currentX: x,
-            alpha: baseAlpha
-          });
+        for (let l = 0; l < i; l++) {
+          for (let h = 0; h < s; h++) {
+            const c = l * e + r;
+            const p = h * e + n;
+            this.points.push({ x: c, y: p, dx: o - c, dy: a - p, flowX: 0 });
+          }
         }
       }
 
       movePoints() {
-        if (!this.stars || !this.stars.length) return;
-        const t = performance.now() * 0.001;
-        this.stars.forEach(s => {
-          s.alpha = Math.max(0.18, Math.min(1, s.baseAlpha + Math.sin(t * s.speed * 8 + s.phase) * 0.32));
-          s.currentX = (s.origX + (this.animationProgress * s.driftSpeed * 0.06)) % this.bounding.width;
-          if (s.currentX < 0) s.currentX += this.bounding.width;
+        this.points.forEach(i => {
+          i.flowX = (this.animationProgress * -0.05) % 24;
         });
       }
 
       drawPoints() {
-        if (!this.stars || !this.stars.length) return;
-        const { bounding: t, ctx: e, stars: i, pointsProgress: r } = this;
+        const { bounding: t, ctx: e, points: i, pointsProgress: r } = this;
         e.clearRect(0, 0, t.width, t.height);
-        
+        e.beginPath();
         const isCrimson = document.documentElement.classList.contains("theme-crimson");
-        const rgb = isCrimson ? "184, 20, 20" : "255, 240, 235";
-
-        i.forEach(s => {
-          const posX = s.currentX + s.dx * (1 - r) * 0.35;
-          const posY = s.origY + s.dy * (1 - r) * 0.35;
-          const currentAlpha = s.alpha * Math.max(0.35, r);
-
-          if (s.isCross) {
-            const cr = s.r * (0.85 + 0.35 * s.alpha);
-            e.fillStyle = `rgba(${rgb}, ${currentAlpha * 0.95})`;
-            e.beginPath();
-            e.moveTo(posX, posY - cr);
-            e.quadraticCurveTo(posX, posY, posX + cr, posY);
-            e.quadraticCurveTo(posX, posY, posX, posY + cr);
-            e.quadraticCurveTo(posX, posY, posX - cr, posY);
-            e.quadraticCurveTo(posX, posY, posX, posY - cr);
-            e.fill();
-            e.beginPath();
-            e.arc(posX, posY, cr * 0.35, 0, Math.PI * 2);
-            e.fillStyle = `rgba(${rgb}, ${currentAlpha})`;
-            e.fill();
-          } else {
-            e.beginPath();
-            e.arc(posX, posY, s.r, 0, Math.PI * 2);
-            e.fillStyle = `rgba(${rgb}, ${currentAlpha})`;
-            e.fill();
-          }
+        e.fillStyle = isCrimson ? "rgba(244, 12, 63, 0.45)" : "rgba(255, 240, 235, 0.4)";
+        i.forEach(l => {
+          const h = l.x + l.dx * (1 - r) * 0.2 + l.flowX;
+          const c = l.y + l.dy * (1 - r) * 0.2;
+          e.rect(h, c, 1.2, 1.2);
         });
+        e.fill();
       }
 
       tick() {
