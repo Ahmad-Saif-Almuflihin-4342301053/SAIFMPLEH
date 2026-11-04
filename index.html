@@ -1433,11 +1433,11 @@
 
     /* Sticky Iris Mask Overlay */
     .s__mask-outer {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100vh;
+      height: 100%;
       overflow: hidden;
       pointer-events: none;
       z-index: 4;
@@ -1499,14 +1499,15 @@
     /* Hidden Anchor Title (Dead-Center Reference for Letter Ghosts) */
     .s-work .s__title,
     .s-work .s__scene {
-      font: 700 min(18.75rem, 25vh) / 1 var(--font-family-bigger);
+      font: 700 min(13.5rem, 16.5vh) / 0.92 var(--font-family-bigger);
       text-align: center;
       text-transform: uppercase;
+      letter-spacing: -0.01em;
     }
 
     .s-work .s__title__inner,
     .s-work .s__scene__letter {
-      line-height: 0.85;
+      line-height: 0.88;
     }
 
     .s-work .s__title {
@@ -1514,10 +1515,9 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 0.7em;
+      width: auto;
       opacity: 0;
       pointer-events: none;
-      word-break: break-all;
       z-index: 0;
     }
 
@@ -1557,20 +1557,12 @@
                              calc(var(--iy) * 50% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
+      text-shadow: 2px 2px 0 var(--color-shadow);
     }
 
-    /* 3D Extrusion Layer behind each Letter */
+    /* 3D Extrusion Layer behind each Letter (Optimized for 60fps) */
     .s-work .s__scene .s__scene__letter::before {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      color: var(--color-shadow);
-      opacity: min(calc(var(--state) * 2), 1);
-      transform: scale(1.05, 1.02) translate3d(calc(var(--head) * 0.1rem * var(--state) * var(--state)), 0, 0);
-      transform-origin: calc(50% - var(--head) * 50%) -50%;
-      will-change: opacity, transform;
-      content: attr(data-letter);
+      display: none;
     }
 
     /* 3D Orbiting Work Cards (<a-work>) */
@@ -1585,6 +1577,8 @@
                              calc(var(--progress, 1) * var(--progress, 1) * -5rem)) 
                  scale(var(--size, 1));
       will-change: transform;
+      backface-visibility: hidden;
+      contain: layout style paint;
     }
 
     a-work {
@@ -2553,6 +2547,17 @@
       <!-- Pinned 3D Stage -->
       <div class="s__inner js-container">
         
+        <!-- Sticky SVG Pill Iris Mask with double cutout & dynamic grid lines -->
+        <div class="s__mask-outer">
+          <div class="s__mask js-mask">
+            <svg class="s__mask__svg js-mask-svg">
+              <path class="s__mask__path-inner js-mask-path-inner" d=""></path>
+              <path class="s__mask__path-outer js-mask-path-outer" d=""></path>
+              <path class="s__mask__path-lines js-mask-path-lines" d=""></path>
+            </svg>
+          </div>
+        </div>
+
         <!-- Center Anchor Title used as geometric reference for letter origins -->
         <h2 class="s__title">
           <span class="s__title__inner js-title">
@@ -2674,17 +2679,6 @@
 
         <!-- Background dot grid canvas -->
         <canvas class="s__canvas js-canvas"></canvas>
-      </div>
-
-      <!-- Sticky SVG Pill Iris Mask with double cutout & dynamic grid lines -->
-      <div class="s__mask-outer">
-        <div class="s__mask js-mask">
-          <svg class="s__mask__svg js-mask-svg">
-            <path class="s__mask__path-inner js-mask-path-inner" d=""></path>
-            <path class="s__mask__path-outer js-mask-path-outer" d=""></path>
-            <path class="s__mask__path-lines js-mask-path-lines" d=""></path>
-          </svg>
-        </div>
       </div>
 
       <!-- Invisible geometry ruler -->
@@ -2932,8 +2926,8 @@
         if (name === "progress") {
           this.style.setProperty("--progress", newValue);
           const p = parseFloat(newValue);
-          // Play video when card enters visible range, pause when exiting
-          if (p <= -0.95 || p >= 0.95) {
+          // Play video only when card is comfortably in viewport, pause when exiting
+          if (p <= -0.45 || p >= 0.45) {
             if (this.isPlaying) {
               if (this.video) this.video.pause();
               this.isPlaying = false;
@@ -3012,9 +3006,11 @@
 
       initLenis() {
         this.lenis = new Lenis({
-          duration: 1.2,
+          duration: 0.7,
           easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          smoothWheel: true
+          smoothWheel: true,
+          wheelMultiplier: 1.0,
+          touchMultiplier: 1.5
         });
         window.__lenis = this.lenis;
 
@@ -3022,7 +3018,7 @@
         gsap.ticker.add((time) => {
           this.lenis.raf(time * 1000);
         });
-        gsap.ticker.lagSmoothing(0);
+        gsap.ticker.lagSmoothing(500, 33);
       }
 
       bindEvents() {
@@ -3044,8 +3040,8 @@
       }
 
       setSize() {
-        // Height based on number of projects (each card gets ~60vh of scroll distance)
-        const totalHeightVh = Math.max(450, this.works.length * 60);
+        // Height based on number of projects (smooth 35vh per card instead of heavy 60vh)
+        const totalHeightVh = Math.max(260, this.works.length * 35);
         this.el.style.setProperty("--height", `${totalHeightVh}vh`);
         
         const w = window.innerWidth;
@@ -3065,10 +3061,11 @@
         t.svg.style.width = t.width + "px";
         t.svg.style.height = t.height + "px";
 
-        const n = Math.min(e * 0.166667, 19.625 * 16);
-        const o = i * 0.8;
+        // Balanced stadium capsule (not squished/meleyot)
+        const n = Math.min(Math.max(e * 0.22, 260), 380);
+        const o = Math.min(Math.max(i * 0.68, 460), 620);
         const a = (e - n) / 2;
-        const l = i * 0.1;
+        const l = (i - o) / 2;
 
         const h = `M -1 0 L ${e + 2} 0 L ${e + 2} ${i} L -1 ${i} Z`;
         
@@ -3079,7 +3076,7 @@
           bl: { x: a, y: l + o }
         };
         let p = (c.tr.x - c.tl.x) / 2;
-        t.maxScale = (e / p) * 1.05;
+        t.maxScale = (e / p) * 1.25;
 
         let f = `M ${c.tl.x} ${c.tl.y + p} A ${p} ${p} 0 0 1 ${c.tr.x} ${c.tr.y + p} L ${c.br.x} ${c.br.y - p} A ${p} ${p} 0 0 1 ${c.bl.x} ${c.bl.y - p} Z`;
         const g = `${h} ${f}`;
@@ -3132,8 +3129,8 @@
           i.left = r.left - containerRect.left;
           i.freq = 1.0 + (s * 0.12);
 
-          const n = window.innerWidth > 767 ? 0.75 : 0.5;
-          i.total = Math.round(this.bounding.width / i.width * n) + 2;
+          const n = window.innerWidth > 767 ? 0.28 : 0.2;
+          i.total = Math.max(4, Math.round(this.bounding.width / i.width * n));
 
           for (let o = 0; o < i.total; o++) {
             const a = document.createElement("span");
@@ -3188,7 +3185,7 @@
             trigger: t,
             start: "top top",
             end: "bottom bottom",
-            scrub: 1
+            scrub: 0.4
           },
           onUpdate: () => {
             s.style.setProperty("--state", String(self.state));
@@ -3240,7 +3237,7 @@
 
       setPoints() {
         this.points = [];
-        const e = 24;
+        const e = 42;
         const i = Math.ceil(this.bounding.width * 1.2 / e);
         const s = Math.ceil(this.bounding.height * 1.2 / e);
         const r = (this.bounding.width - i * e) * 0.5;
@@ -3279,6 +3276,9 @@
         const topPos = ScrollTrigger.positionInViewport(this.el, "top");
         const btmPos = ScrollTrigger.positionInViewport(this.el, "bottom");
         
+        // If #work is completely out of view, skip heavy rendering for 60fps performance
+        if (topPos > 1.2 || btmPos < -0.2) return;
+
         this.scrollProgress = Math.max(Math.min(1, topPos), 0) * -1 + (1 - Math.max(Math.min(1, btmPos), 0));
         this.smoothScrollProgress += (this.scrollProgress - this.smoothScrollProgress) * 0.1;
         this.el.style.setProperty("--scroll-progress", String(this.scrollProgress));
@@ -3763,7 +3763,16 @@
         setSizeAndLines();
         window.addEventListener("resize", setSizeAndLines);
 
+        let isMyWayVisible = false;
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top bottom+=400px",
+          end: "bottom top-=400px",
+          onToggle: (self) => { isMyWayVisible = self.isActive; }
+        });
+
         gsap.ticker.add(() => {
+          if (!isMyWayVisible) return;
           const curY = window.scrollY + window.innerHeight;
           scroll.p = Math.max(0, Math.min(1, (curY - scroll.start) / (scroll.end - scroll.start)));
           scroll.sp += (scroll.p - scroll.sp) * 0.1;
@@ -3916,7 +3925,16 @@
           y: pt.y + pt.my + pt.oy * wave.op
         });
 
+        let isCtaVisible = false;
+        ScrollTrigger.create({
+          trigger: cta,
+          start: "top bottom+=400px",
+          end: "bottom top-=400px",
+          onToggle: (self) => { isCtaVisible = self.isActive; }
+        });
+
         gsap.ticker.add(() => {
+          if (!isCtaVisible) return;
           if (wave.progress < grid.height * 1.2) {
             wave.progress += wave.speed;
           }
