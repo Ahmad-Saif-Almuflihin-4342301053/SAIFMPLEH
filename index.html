@@ -998,7 +998,7 @@
       margin: 0 auto;
       width: var(--width);
       border: 1px solid var(--color-secondary);
-      transform: translate3d(0, var(--offset-y), 0);
+      transform: translate3d(0, 0, 0);
       will-change: transform;
     }
 
@@ -1544,17 +1544,23 @@
       will-change: transform;
     }
 
-    /* 3D Orbiting Letter Ghost */
+    /* 3D Orbiting Letter Ghost (Centered in capsule & orbiting in 3D) */
     .s-work .s__scene .s__scene__letter {
       --head: calc((var(--progress) - 0.5) * -2);
       --ahead: calc(var(--head) * var(--head));
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 50%;
+      left: 50%;
+      width: 2em;
+      margin-left: -1em;
+      margin-top: -0.5em;
+      line-height: 1;
+      text-align: center;
       display: block;
-      transform: rotateY(calc(var(--head) * -10deg * var(--state))) 
-                 translate3d(calc(var(--head) * 50vw * var(--state)),
-                             calc(var(--iy) * 50% * var(--ahead) * var(--state)), 0);
+      transform: translate3d(0, var(--base-y, 0px), 0)
+                 rotateY(calc(var(--head) * -10deg * var(--state))) 
+                 translate3d(calc(var(--head) * 52vw * var(--state)),
+                             calc(var(--iy) * 60% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
       text-shadow: 2px 2px 0 var(--color-shadow);
@@ -2890,10 +2896,19 @@
         `;
         this.chars = this.querySelectorAll(".js-char");
 
-        gsap.ticker.add(() => {
-          if (Math.random() > 0.15) return;
+        let isSeparatorVisible = false;
+        const io = new IntersectionObserver(([entry]) => {
+          isSeparatorVisible = entry.isIntersecting;
+        });
+        io.observe(this);
+
+        let lastSeparatorFlip = 0;
+        gsap.ticker.add((time) => {
+          if (!isSeparatorVisible) return;
+          if (time - lastSeparatorFlip < 0.15) return;
+          lastSeparatorFlip = time;
           this.chars.forEach((c) => {
-            if (!c.classList.contains("a__char--blank") && Math.random() < 0.06) {
+            if (!c.classList.contains("a__char--blank") && Math.random() < 0.08) {
               c.classList.remove("a__char--0", "a__char--1");
               c.classList.add("a__char--" + (Math.random() > 0.5 ? "0" : "1"));
             }
@@ -3006,11 +3021,11 @@
 
       initLenis() {
         this.lenis = new Lenis({
-          duration: 0.7,
+          duration: 0.85,
           easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
           smoothWheel: true,
-          wheelMultiplier: 1.0,
-          touchMultiplier: 1.5
+          wheelMultiplier: 0.9,
+          touchMultiplier: 1.2
         });
         window.__lenis = this.lenis;
 
@@ -3018,7 +3033,7 @@
         gsap.ticker.add((time) => {
           this.lenis.raf(time * 1000);
         });
-        gsap.ticker.lagSmoothing(500, 33);
+        gsap.ticker.lagSmoothing(1000, 16);
       }
 
       bindEvents() {
@@ -3030,6 +3045,14 @@
           this.setLetters();
           this.setWorks();
           this.setTimeline();
+        });
+
+        this.isWorkVisible = false;
+        ScrollTrigger.create({
+          trigger: this.el,
+          start: "top bottom+=200px",
+          end: "bottom top-=200px",
+          onToggle: (self) => { this.isWorkVisible = self.isActive; }
         });
 
         gsap.ticker.add(() => this.tick());
@@ -3061,9 +3084,9 @@
         t.svg.style.width = t.width + "px";
         t.svg.style.height = t.height + "px";
 
-        // Balanced stadium capsule (not squished/meleyot)
-        const n = Math.min(Math.max(e * 0.22, 260), 380);
-        const o = Math.min(Math.max(i * 0.68, 460), 620);
+        // Sleek, slim stadium capsule (aesthetic & proportional)
+        const n = Math.min(Math.max(e * 0.16, 210), 280);
+        const o = Math.min(Math.max(i * 0.62, 420), 540);
         const a = (e - n) / 2;
         const l = (i - o) / 2;
 
@@ -3116,21 +3139,20 @@
 
       setLetters() {
         const { letters: t, scene: e } = this;
-        const containerRect = this.container.getBoundingClientRect();
+        const rowSpacing = Math.min(window.innerHeight * 0.115, 95);
 
         t.forEach((i, s) => {
           i.ghosts.forEach(o => o.el.remove());
           i.ghosts = [];
 
-          const r = i.el.getBoundingClientRect();
-          i.width = r.width || (window.innerWidth * 0.12);
-          i.height = r.height || (window.innerHeight * 0.2);
-          i.top = r.top - containerRect.top;
-          i.left = r.left - containerRect.left;
+          i.width = window.innerWidth * 0.12;
+          i.height = window.innerHeight * 0.18;
           i.freq = 1.0 + (s * 0.12);
 
-          const n = window.innerWidth > 767 ? 0.28 : 0.2;
-          i.total = Math.max(4, Math.round(this.bounding.width / i.width * n));
+          const n = window.innerWidth > 767 ? 0.65 : 0.45;
+          i.total = Math.max(9, Math.min(13, Math.round(this.bounding.width / i.width * n)));
+
+          const baseY = (s - 1.5) * rowSpacing;
 
           for (let o = 0; o < i.total; o++) {
             const a = document.createElement("span");
@@ -3141,17 +3163,13 @@
 
             const l = {
               el: a,
-              x: i.left,
-              y: i.top,
-              z: 0,
               i: o - i.total * 0.5,
               p: (o / i.total - 0.5) * 2,
               ap: Math.abs(o / i.total - 0.5) * 2
             };
 
-            a.style.top = `${l.y}px`;
-            a.style.left = `${l.x}px`;
             a.style.zIndex = String(s !== 1 && s !== 2 && (s + t.length + o) % 5 === 0 ? 3 : 1);
+            a.style.setProperty("--base-y", `${baseY}px`);
             a.style.setProperty("--ix", String(l.i));
             a.style.setProperty("--iy", String(((s + 1) / (t.length + 1) - 0.5) * 2));
             a.style.setProperty("--ap", String(l.ap));
@@ -3236,43 +3254,89 @@
       }
 
       setPoints() {
-        this.points = [];
-        const e = 42;
-        const i = Math.ceil(this.bounding.width * 1.2 / e);
-        const s = Math.ceil(this.bounding.height * 1.2 / e);
-        const r = (this.bounding.width - i * e) * 0.5;
-        const n = (this.bounding.height - s * e) * 0.5;
-        const o = this.bounding.width * 0.5;
-        const a = this.bounding.height * 0.5;
+        this.stars = [];
+        const w = this.bounding.width;
+        const h = this.bounding.height;
+        const count = window.innerWidth > 767 ? 220 : 120;
+        const cx = w * 0.5;
+        const cy = h * 0.5;
 
-        for (let l = 0; l < i; l++) {
-          for (let h = 0; h < s; h++) {
-            const c = l * e + r;
-            const p = h * e + n;
-            this.points.push({ x: c, y: p, dx: o - c, dy: a - p, flowX: 0 });
-          }
+        for (let i = 0; i < count; i++) {
+          const x = Math.random() * w;
+          const y = Math.random() * h;
+          const isCross = Math.random() < 0.12;
+          const r = isCross ? (1.8 + Math.random() * 1.8) : (0.6 + Math.random() * 1.4);
+          const baseAlpha = 0.25 + Math.random() * 0.65;
+          const speed = 0.015 + Math.random() * 0.035;
+          const phase = Math.random() * Math.PI * 2;
+          const driftSpeed = (0.2 + Math.random() * 0.6) * (Math.random() > 0.5 ? 1 : -1);
+
+          this.stars.push({
+            x,
+            y,
+            origX: x,
+            origY: y,
+            dx: cx - x,
+            dy: cy - y,
+            r,
+            isCross,
+            baseAlpha,
+            speed,
+            phase,
+            driftSpeed,
+            currentX: x,
+            alpha: baseAlpha
+          });
         }
       }
 
       movePoints() {
-        this.points.forEach(i => {
-          i.flowX = (this.animationProgress * -0.05) % 24;
+        const t = performance.now() * 0.001;
+        this.stars.forEach(s => {
+          s.alpha = Math.max(0.12, Math.min(1, s.baseAlpha + Math.sin(t * s.speed * 8 + s.phase) * 0.28));
+          s.currentX = (s.origX + (this.animationProgress * s.driftSpeed * 0.06)) % this.bounding.width;
+          if (s.currentX < 0) s.currentX += this.bounding.width;
         });
       }
 
       drawPoints() {
-        const { bounding: t, ctx: e, points: i, pointsProgress: r } = this;
+        const { bounding: t, ctx: e, stars: i, pointsProgress: r } = this;
         e.clearRect(0, 0, t.width, t.height);
-        e.beginPath();
-        i.forEach(l => {
-          const h = l.x + l.dx * (1 - r) * 0.2 + l.flowX;
-          const c = l.y + l.dy * (1 - r) * 0.2;
-          e.rect(h, c, 0.75, 0.75);
+        
+        const isCrimson = document.documentElement.classList.contains("theme-crimson");
+        const rgb = isCrimson ? "184, 20, 20" : "255, 240, 235";
+
+        i.forEach(s => {
+          const posX = s.currentX + s.dx * (1 - r) * 0.35;
+          const posY = s.origY + s.dy * (1 - r) * 0.35;
+          const currentAlpha = s.alpha * Math.max(0.25, r);
+
+          if (s.isCross) {
+            const cr = s.r * (0.8 + 0.3 * s.alpha);
+            e.fillStyle = `rgba(${rgb}, ${currentAlpha * 0.9})`;
+            e.beginPath();
+            e.moveTo(posX, posY - cr);
+            e.quadraticCurveTo(posX, posY, posX + cr, posY);
+            e.quadraticCurveTo(posX, posY, posX, posY + cr);
+            e.quadraticCurveTo(posX, posY, posX - cr, posY);
+            e.quadraticCurveTo(posX, posY, posX, posY - cr);
+            e.fill();
+            e.beginPath();
+            e.arc(posX, posY, cr * 0.35, 0, Math.PI * 2);
+            e.fillStyle = `rgba(${rgb}, ${currentAlpha})`;
+            e.fill();
+          } else {
+            e.beginPath();
+            e.arc(posX, posY, s.r, 0, Math.PI * 2);
+            e.fillStyle = `rgba(${rgb}, ${currentAlpha})`;
+            e.fill();
+          }
         });
-        e.stroke();
       }
 
       tick() {
+        if (!this.isWorkVisible) return;
+
         const topPos = ScrollTrigger.positionInViewport(this.el, "top");
         const btmPos = ScrollTrigger.positionInViewport(this.el, "bottom");
         
@@ -3654,19 +3718,23 @@
           drawTunnelLines();
         });
 
+        // Butter-smooth GPU-accelerated scroll parallax synchronized with Lenis
+        gsap.fromTo(inner, 
+          { y: -30 }, 
+          { 
+            y: 30, 
+            ease: "none", 
+            scrollTrigger: {
+              trigger: el,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true
+            }
+          }
+        );
+
         let hadSmileys = false;
         gsap.ticker.add(() => {
-          const curY = window.scrollY + window.innerHeight;
-          scroll.p = Math.max(0, Math.min(1, (curY - scroll.start) / (scroll.end - scroll.start)));
-          scroll.sp += (scroll.p - scroll.sp) * 0.2;
-
-          const newOffset = (window.innerWidth > 767 ? 400 : 200) * (scroll.sp * 2 - 1);
-          if (Math.abs(newOffset - bounding.offsetY) > 0.2) {
-            bounding.offsetY = newOffset;
-            el.style.setProperty("--offset-y", `${bounding.offsetY}px`);
-            drawTunnelLines();
-          }
-
           if (smileys.length > 0) {
             hadSmileys = true;
             ctx.clearRect(0, 0, bounding.width, bounding.height);
