@@ -1544,23 +1544,17 @@
       will-change: transform;
     }
 
-    /* 3D Orbiting Letter Ghost (Centered in capsule & orbiting in 3D) */
+    /* 3D Orbiting Letter Ghost (Authentic Wodniack Cylindrical Marquee) */
     .s-work .s__scene .s__scene__letter {
       --head: calc((var(--progress) - 0.5) * -2);
       --ahead: calc(var(--head) * var(--head));
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 2em;
-      margin-left: -1em;
-      margin-top: -0.5em;
-      line-height: 1;
-      text-align: center;
+      top: 0;
+      left: 0;
       display: block;
-      transform: translate3d(0, calc(var(--base-y, 0px) * (1 - var(--state, 0))), 0)
-                 rotateY(calc(var(--head) * -10deg * var(--state, 0))) 
-                 translate3d(calc(var(--head) * 52vw * var(--state, 0)),
-                             calc(var(--iy) * 60% * var(--ahead) * var(--state, 0)), 0);
+      transform: rotateY(calc(var(--head) * -10deg * var(--state))) 
+                 translate3d(calc(var(--head) * 50vw * var(--state)),
+                             calc(var(--iy) * 50% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
       text-shadow: 2px 2px 0 var(--color-shadow);
@@ -3084,9 +3078,9 @@
         t.svg.style.width = t.width + "px";
         t.svg.style.height = t.height + "px";
 
-        // Sleek, slim stadium capsule (aesthetic & proportional)
-        const n = Math.min(Math.max(e * 0.16, 210), 280);
-        const o = Math.min(Math.max(i * 0.62, 420), 540);
+        // Authentic sleek stadium capsule (proportional & balanced)
+        const n = Math.min(Math.max(e * 0.19, 250), 320);
+        const o = Math.min(Math.max(i * 0.70, 480), 560);
         const a = (e - n) / 2;
         const l = (i - o) / 2;
 
@@ -3139,20 +3133,21 @@
 
       setLetters() {
         const { letters: t, scene: e } = this;
-        const rowSpacing = Math.min(window.innerHeight * 0.115, 95);
+        const containerRect = this.container.getBoundingClientRect();
 
         t.forEach((i, s) => {
           i.ghosts.forEach(o => o.el.remove());
           i.ghosts = [];
 
-          i.width = window.innerWidth * 0.12;
-          i.height = window.innerHeight * 0.18;
+          const r = i.el.getBoundingClientRect();
+          i.width = r.width || (window.innerWidth * 0.12);
+          i.height = r.height || (window.innerHeight * 0.2);
+          i.top = r.top - containerRect.top;
+          i.left = r.left - containerRect.left;
           i.freq = 1.0 + (s * 0.12);
 
           const n = window.innerWidth > 767 ? 0.65 : 0.45;
-          i.total = Math.max(9, Math.min(13, Math.round(this.bounding.width / i.width * n)));
-
-          const baseY = (s - 1.5) * rowSpacing;
+          i.total = Math.max(7, Math.round(this.bounding.width / i.width * n));
 
           for (let o = 0; o < i.total; o++) {
             const a = document.createElement("span");
@@ -3163,13 +3158,17 @@
 
             const l = {
               el: a,
+              x: i.left,
+              y: i.top,
+              z: 0,
               i: o - i.total * 0.5,
               p: (o / i.total - 0.5) * 2,
               ap: Math.abs(o / i.total - 0.5) * 2
             };
 
+            a.style.top = `${l.y}px`;
+            a.style.left = `${l.x}px`;
             a.style.zIndex = String(s !== 1 && s !== 2 && (s + t.length + o) % 5 === 0 ? 3 : 1);
-            a.style.setProperty("--base-y", `${baseY}px`);
             a.style.setProperty("--ix", String(l.i));
             a.style.setProperty("--iy", String(((s + 1) / (t.length + 1) - 0.5) * 2));
             a.style.setProperty("--ap", String(l.ap));
