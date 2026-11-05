@@ -3142,6 +3142,7 @@
 
       setLetters() {
         const { letters: t, scene: e } = this;
+        const containerCenterX = this.bounding.width / 2;
 
         t.forEach((i, s) => {
           i.ghosts.forEach(o => o.el.remove());
@@ -3151,7 +3152,8 @@
           i.width = r.width;
           i.height = r.height;
           i.top = r.top - this.bounding.top;
-          i.left = r.left;
+          // Dead-center horizontal alignment inside the capsule stage:
+          i.left = containerCenterX - (i.width / 2);
           i.freq = 1.0 + (s * 0.12);
 
           const n = window.innerWidth > 767 ? 0.75 : 0.5;
@@ -3176,6 +3178,8 @@
 
             a.style.top = `${l.y}px`;
             a.style.left = `${l.x}px`;
+            a.style.width = `${i.width}px`;
+            a.style.textAlign = "center";
             a.style.zIndex = String(s !== 1 && s !== 2 && (s + t.length + o) % 5 === 0 ? 3 : 1);
             a.style.setProperty("--ix", String(l.i));
             a.style.setProperty("--iy", String(((s + 1) / (t.length + 1) - 0.5) * 2));
