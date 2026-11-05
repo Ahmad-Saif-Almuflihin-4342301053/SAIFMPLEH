@@ -1499,7 +1499,7 @@
     /* Hidden Anchor Title (Dead-Center Reference for Letter Ghosts) */
     .s-work .s__title,
     .s-work .s__scene {
-      font: 700 min(25rem, 28vh) / 0.85 var(--font-family-bigger);
+      font: 700 min(19rem, 22.5vh) / 0.86 var(--font-family-bigger);
       text-align: center;
       text-transform: uppercase;
       letter-spacing: -0.01em;
@@ -1507,7 +1507,7 @@
 
     .s-work .s__title__inner,
     .s-work .s__scene__letter {
-      line-height: 0.85;
+      line-height: 0.86;
     }
 
     .s-work .s__title {
@@ -1535,7 +1535,7 @@
     .s-work .s__title__letter {
       display: block;
       text-align: center;
-      line-height: 0.85;
+      line-height: 0.86;
       margin: 0 auto;
     }
 
@@ -1554,7 +1554,7 @@
       will-change: transform;
     }
 
-    /* 3D Orbiting Letter Ghost (Cylindrical Marquee covering full screen) */
+    /* 3D Orbiting Letter Ghost (Clean & Balanced Cylindrical Marquee) */
     .s-work .s__scene .s__scene__letter {
       --head: calc((var(--progress) - 0.5) * -2);
       --ahead: calc(var(--head) * var(--head));
@@ -1564,8 +1564,8 @@
       display: block;
       text-align: center;
       transform: rotateY(calc(var(--head) * -12deg * var(--state))) 
-                 translate3d(calc(var(--head) * 65vw * var(--state)),
-                             calc(var(--iy) * 65% * var(--ahead) * var(--state)), 0);
+                 translate3d(calc(var(--head) * 56vw * var(--state)),
+                             calc(var(--iy) * 52% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
     }
@@ -3088,9 +3088,9 @@
         t.svg.style.width = t.width + "px";
         t.svg.style.height = t.height + "px";
 
-        // Authentic Wodniack stadium capsule
+        // Authentic Wodniack stadium capsule with ample vertical clearance for letters
         const n = Math.min(Math.max(e * 0.18, 250), 320);
-        const o = Math.min(Math.max(i * 0.78, 520), 620);
+        const o = Math.min(Math.max(i * 0.82, 530), 640);
         const a = (e - n) / 2;
         const l = (i - o) / 2;
 
@@ -3151,18 +3151,18 @@
           i.ghosts = [];
 
           const r = i.el.getBoundingClientRect();
-          i.width = r.width || (window.innerWidth * 0.12);
-          i.height = r.height || (window.innerHeight * 0.28);
+          i.width = r.width || (window.innerWidth * 0.1);
+          i.height = r.height || (window.innerHeight * 0.22);
           i.top = r.top - containerRect.top;
           // Dead-center horizontal alignment inside the capsule:
           i.left = containerCenterX - (i.width / 2);
           i.freq = 1.0 + (s * 0.12);
 
-          // Rich, dense ghost population across 3D cylinder to fill the entire screen
-          const n = window.innerWidth > 767 ? 2.2 : 1.6;
-          i.total = Math.max(18, Math.round(this.bounding.width / i.width * n) + 4);
+          // Perfectly spaced 3D cylindrical marquee (direnggangin dikit, pas & tidak numpuk)
+          const n = window.innerWidth > 767 ? 1.15 : 0.85;
+          i.total = Math.round(this.bounding.width / i.width * n) + 2;
 
-          const phaseOffset = s * 0.22;
+          const phaseOffset = s * 0.14;
 
           for (let o = 0; o < i.total; o++) {
             const a = document.createElement("span");
@@ -3262,7 +3262,7 @@
         const { speed: t, letters: e, animationProgress: i } = this;
         e.forEach((s, sIdx) => {
           const n = t * s.freq;
-          const phaseOffset = sIdx * 0.22;
+          const phaseOffset = sIdx * 0.14;
           s.ghosts.forEach((o, a) => {
             const l = (((i % n) / n + (a / s.total) + phaseOffset) % 1) / 0.7 - 0.15;
             o.el.style.setProperty("--progress", String(l));
