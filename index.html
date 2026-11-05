@@ -1499,10 +1499,10 @@
       transform: translate3d(0, calc(var(--scroll-progress, 0) * -5%), 0);
     }
 
-    /* Hidden Anchor Title (Dead-Center Reference for Letter Ghosts) */
+    /* Hidden Anchor Title (Dead-Center Reference for Letter Ghosts with Safe Top Clearance) */
     .s-work .s__title,
     .s-work .s__scene {
-      font: 700 min(19rem, 22vh) / 0.88 var(--font-family-bigger);
+      font: 700 min(16.5rem, 21.5vh) / 1 var(--font-family-bigger);
       text-align: center;
       text-transform: uppercase;
       letter-spacing: -0.01em;
@@ -1510,12 +1510,12 @@
 
     .s-work .s__title__inner,
     .s-work .s__scene__letter {
-      line-height: 0.88;
+      line-height: 0.85;
     }
 
     .s-work .s__title {
       position: absolute;
-      top: 52%; /* Offset slightly downward so W has ample headroom inside capsule */
+      top: 52%; /* Lowered slightly to ensure W letter has full headroom without clipping */
       left: 50%;
       transform: translate(-50%, -50%);
       width: auto;
@@ -1538,7 +1538,7 @@
     .s-work .s__title__letter {
       display: block;
       text-align: center;
-      line-height: 0.88;
+      line-height: 0.85;
       margin: 0 auto;
     }
 
@@ -1553,11 +1553,11 @@
       z-index: 2;
       width: 100%;
       height: 100%;
-      perspective: 42rem;
+      perspective: 40rem;
       will-change: transform;
     }
 
-    /* 3D Orbiting Letter Ghost (Clean & Balanced Cylindrical Marquee) */
+    /* 3D Orbiting Letter Ghost (Authentic Wodniack Cylindrical Marquee) */
     .s-work .s__scene .s__scene__letter {
       --head: calc((var(--progress) - 0.5) * -2);
       --ahead: calc(var(--head) * var(--head));
@@ -1566,20 +1566,17 @@
       left: 0;
       display: block;
       text-align: center;
-      text-shadow: none !important;
-      filter: none !important;
-      transform: rotateY(calc(var(--head) * -12deg * var(--state))) 
-                 translate3d(calc(var(--head) * 62vw * var(--state)),
-                             calc(var(--iy) * 54% * var(--ahead) * var(--state)), 0);
+      transform: rotateY(calc(var(--head) * -10deg * var(--state))) 
+                 translate3d(calc(var(--head) * 50vw * var(--state)),
+                             calc(var(--iy) * 50% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
     }
 
-    /* Absolutely no duplicate extrusion shadows */
+    /* Shadow / Extrusion removed to prevent dark visual noise and messy letter collision */
     .s-work .s__scene .s__scene__letter::before {
       display: none !important;
       content: none !important;
-      opacity: 0 !important;
     }
 
     /* 3D Orbiting Work Cards (<a-work>) */
@@ -3096,8 +3093,8 @@
         t.svg.style.height = t.height + "px";
 
         // Enlarged stadium capsule with generous headroom and breathing space
-        const n = Math.min(Math.max(e * 0.22, 280), 360);
-        const o = Math.min(Math.max(i * 0.90, 600), 740);
+        const n = Math.min(Math.max(e * 0.23, 290), 380);
+        const o = Math.min(Math.max(i * 0.93, 620), 780);
         const a = (e - n) / 2;
         const l = (i - o) / 2;
 
@@ -3165,11 +3162,10 @@
           i.left = containerCenterX - (i.width / 2);
           i.freq = 1.0 + (s * 0.12);
 
-          // Exactly fills each former gap with 1 letter (total 12 on desktop, 8 on mobile):
-          // yielding ~6 visible letters across the screen with clean spacing between them
-          i.total = window.innerWidth > 767 ? 12 : 8;
-
-          const phaseOffset = s * 0.15;
+          // Authentic dynamic density matching letter width and screen width:
+          // Produces a consistent, clean ~20-25px gap between letters without collision
+          const density = window.innerWidth > 767 ? 1.05 : 0.75;
+          i.total = Math.round((this.bounding.width / i.width) * density) + 2;
 
           for (let o = 0; o < i.total; o++) {
             const a = document.createElement("span");
@@ -3198,7 +3194,7 @@
             a.style.setProperty("--ap", String(l.ap));
             a.style.setProperty("--p", String(l.p));
 
-            const initialProg = (((o / i.total) + phaseOffset) % 1) / 0.7 - 0.15;
+            const initialProg = ((o / i.total) % 1) / 0.7 - 0.15;
             a.style.setProperty("--progress", String(initialProg));
 
             i.ghosts.push(l);
@@ -3267,11 +3263,10 @@
 
       moveLetters() {
         const { speed: t, letters: e, animationProgress: i } = this;
-        e.forEach((s, sIdx) => {
+        e.forEach(s => {
           const n = t * s.freq;
-          const phaseOffset = sIdx * 0.15;
           s.ghosts.forEach((o, a) => {
-            const l = (((i % n) / n + (a / s.total) + phaseOffset) % 1) / 0.7 - 0.15;
+            const l = (((i % n) / n + a / s.total) % 1) / 0.7 - 0.15;
             o.el.style.setProperty("--progress", String(l));
           });
         });
