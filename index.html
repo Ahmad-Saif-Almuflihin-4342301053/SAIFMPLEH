@@ -1557,7 +1557,7 @@
       will-change: transform;
     }
 
-    /* 3D Orbiting Letter Ghost (Subtle & Slim Curvature Marquee) */
+    /* 3D Orbiting Letter Ghost (Clean & Balanced Cylindrical Marquee) */
     .s-work .s__scene .s__scene__letter {
       --head: calc((var(--progress) - 0.5) * -2);
       --ahead: calc(var(--head) * var(--head));
@@ -1568,9 +1568,9 @@
       text-align: center;
       text-shadow: none !important;
       filter: none !important;
-      transform: rotateY(calc(var(--head) * -5deg * var(--state))) 
+      transform: rotateY(calc(var(--head) * -12deg * var(--state))) 
                  translate3d(calc(var(--head) * 62vw * var(--state)),
-                             calc(var(--iy) * 8% * var(--ahead) * var(--state)), 0);
+                             calc(var(--iy) * 54% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
     }
