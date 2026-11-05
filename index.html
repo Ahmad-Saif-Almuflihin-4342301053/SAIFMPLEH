@@ -1499,10 +1499,10 @@
       transform: translate3d(0, calc(var(--scroll-progress, 0) * -5%), 0);
     }
 
-    /* Hidden Anchor Title (Dead-Center Reference for Letter Ghosts with Safe Top Clearance) */
+    /* Hidden Anchor Title (Exact Wodniack Dimensions & Positioning) */
     .s-work .s__title,
     .s-work .s__scene {
-      font: 700 min(16.5rem, 21.5vh) / 1 var(--font-family-bigger);
+      font: 700 min(18.75rem, 25vh) / 1 var(--font-family-bigger);
       text-align: center;
       text-transform: uppercase;
       letter-spacing: -0.01em;
@@ -1514,13 +1514,9 @@
     }
 
     .s-work .s__title {
-      position: absolute;
-      top: 52%; /* Lowered slightly to ensure W letter has full headroom without clipping */
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: auto;
-      min-width: 1.5em;
+      width: 0.7em;
       opacity: 0;
+      word-break: break-all;
       pointer-events: none;
       z-index: 0;
     }
@@ -1530,9 +1526,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      margin: 0;
-      padding: 0;
+      margin: 0.075em 0 -0.125em;
     }
 
     .s-work .s__title__letter {
@@ -3085,18 +3079,19 @@
 
       setMask() {
         const { mask: t } = this;
-        const e = this.bounding.width;
-        const i = this.bounding.height;
+        const e = t.el.clientWidth;
+        const i = t.el.clientHeight;
         t.width = e;
         t.height = i;
         t.svg.style.width = t.width + "px";
         t.svg.style.height = t.height + "px";
 
-        // Enlarged stadium capsule with generous headroom and breathing space
-        const n = Math.min(Math.max(e * 0.23, 290), 380);
-        const o = Math.min(Math.max(i * 0.93, 620), 780);
-        const a = (e - n) / 2;
-        const l = (i - o) / 2;
+        const s = this.el.getBoundingClientRect();
+        const r = this.ruler.getBoundingClientRect();
+        const n = r.width;
+        const o = r.height;
+        const a = r.left - s.left;
+        const l = r.top - s.top;
 
         const h = `M -1 0 L ${e + 2} 0 L ${e + 2} ${i} L -1 ${i} Z`;
         
@@ -3107,13 +3102,13 @@
           bl: { x: a, y: l + o }
         };
         let p = (c.tr.x - c.tl.x) / 2;
-        t.maxScale = (e / p) * 1.25;
+        t.maxScale = this.bounding.width / p;
 
         let f = `M ${c.tl.x} ${c.tl.y + p} A ${p} ${p} 0 0 1 ${c.tr.x} ${c.tr.y + p} L ${c.br.x} ${c.br.y - p} A ${p} ${p} 0 0 1 ${c.bl.x} ${c.bl.y - p} Z`;
         const g = `${h} ${f}`;
         t.pathOuter.setAttribute("d", g);
 
-        const d = e > 767 ? 16 : 8;
+        const d = window.innerWidth > 767 ? 16 : 8;
         c.tl.x += d; c.tl.y += d;
         c.tr.x -= d; c.tr.y += d;
         c.br.x -= d; c.br.y -= d;
@@ -3123,7 +3118,7 @@
         t.pathInner.setAttribute("d", `${h} ${f}`);
 
         t.lines = [];
-        const cols = e > 767 ? 12 : 8;
+        const cols = window.innerWidth > 767 ? 12 : 8;
         const colW = e / cols;
         const rowH = i * 0.1;
         const rows = Math.ceil(i / rowH);
@@ -3147,25 +3142,20 @@
 
       setLetters() {
         const { letters: t, scene: e } = this;
-        const containerRect = this.container.getBoundingClientRect();
-        const containerCenterX = containerRect.width / 2;
 
         t.forEach((i, s) => {
           i.ghosts.forEach(o => o.el.remove());
           i.ghosts = [];
 
           const r = i.el.getBoundingClientRect();
-          i.width = r.width || (window.innerWidth * 0.1);
-          i.height = r.height || (window.innerHeight * 0.22);
-          i.top = r.top - containerRect.top;
-          // Dead-center horizontal alignment inside the capsule:
-          i.left = containerCenterX - (i.width / 2);
+          i.width = r.width;
+          i.height = r.height;
+          i.top = r.top - this.bounding.top;
+          i.left = r.left;
           i.freq = 1.0 + (s * 0.12);
 
-          // Exact Wodniack letter spacing & ghost count:
-          // Produces ~8-9 letters for W and ~13 letters for O with comfortable ~30-40px breathing gap
-          const density = window.innerWidth > 767 ? 0.72 : 0.48;
-          i.total = Math.round((this.bounding.width / i.width) * density) + 2;
+          const n = window.innerWidth > 767 ? 0.75 : 0.5;
+          i.total = Math.round(this.bounding.width / i.width * n) + 2;
 
           for (let o = 0; o < i.total; o++) {
             const a = document.createElement("span");
@@ -3186,8 +3176,6 @@
 
             a.style.top = `${l.y}px`;
             a.style.left = `${l.x}px`;
-            a.style.width = `${i.width}px`;
-            a.style.textAlign = "center";
             a.style.zIndex = String(s !== 1 && s !== 2 && (s + t.length + o) % 5 === 0 ? 3 : 1);
             a.style.setProperty("--ix", String(l.i));
             a.style.setProperty("--iy", String(((s + 1) / (t.length + 1) - 0.5) * 2));
