@@ -1570,18 +1570,9 @@
       will-change: transform;
     }
 
-    /* 3D Extrusion Layer behind each Letter (Authentic Wodniack Dimensional Bevel) */
+    /* Clean, crisp letters without duplicate extrusion shadows */
     .s-work .s__scene .s__scene__letter::before {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      color: var(--color-shadow);
-      opacity: min(calc(var(--state) * 2), 1);
-      transform: scale(1.05, 1.02) translate3d(calc(var(--head) * 0.15rem * var(--state) * var(--state)), 0, 0);
-      transform-origin: calc(50% - var(--head) * 50%) -50%;
-      will-change: opacity, transform;
-      content: attr(data-letter);
+      display: none;
     }
 
     /* 3D Orbiting Work Cards (<a-work>) */
