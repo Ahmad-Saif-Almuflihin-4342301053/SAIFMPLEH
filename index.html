@@ -1502,7 +1502,7 @@
     /* Hidden Anchor Title (Dead-Center Reference for Letter Ghosts) */
     .s-work .s__title,
     .s-work .s__scene {
-      font: 700 min(18rem, 21vh) / 0.88 var(--font-family-bigger);
+      font: 700 min(22rem, 24vh) / 0.86 var(--font-family-bigger);
       text-align: center;
       text-transform: uppercase;
       letter-spacing: -0.01em;
@@ -1510,7 +1510,7 @@
 
     .s-work .s__title__inner,
     .s-work .s__scene__letter {
-      line-height: 0.88;
+      line-height: 0.86;
     }
 
     .s-work .s__title {
@@ -1538,7 +1538,7 @@
     .s-work .s__title__letter {
       display: block;
       text-align: center;
-      line-height: 0.88;
+      line-height: 0.86;
       margin: 0 auto;
     }
 
@@ -1557,7 +1557,7 @@
       will-change: transform;
     }
 
-    /* 3D Orbiting Letter Ghost (Clean & Balanced Cylindrical Marquee with Distinct Inter-Letter Spacing) */
+    /* 3D Orbiting Letter Ghost (Rich & Immersive Cylindrical Marquee) */
     .s-work .s__scene .s__scene__letter {
       --head: calc((var(--progress) - 0.5) * -2);
       --ahead: calc(var(--head) * var(--head));
@@ -1569,8 +1569,8 @@
       text-shadow: none !important;
       filter: none !important;
       transform: rotateY(calc(var(--head) * -12deg * var(--state))) 
-                 translate3d(calc(var(--head) * 60vw * var(--state)),
-                             calc(var(--iy) * 50% * var(--ahead) * var(--state)), 0);
+                 translate3d(calc(var(--head) * 62vw * var(--state)),
+                             calc(var(--iy) * 56% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
     }
@@ -3165,13 +3165,11 @@
           i.left = containerCenterX - (i.width / 2);
           i.freq = 1.0 + (s * 0.12);
 
-          // Technical letter spacing (inter-letter gap):
-          // Enforce 7 ghosts per row on desktop (5 on mobile) across 360 degrees.
-          // This mathematically guarantees deltaX > letter_width with a comfortable 40-75px gap,
-          // completely eliminating any horizontal overlap or pseudo-shadow!
-          i.total = window.innerWidth > 767 ? 7 : 5;
+          // Rich, continuous 3D cylindrical marquee (dense, filling screen smoothly without duplicate shadows)
+          const n = window.innerWidth > 767 ? 1.65 : 1.25;
+          i.total = Math.round(this.bounding.width / i.width * n) + 2;
 
-          const phaseOffset = s * 0.16;
+          const phaseOffset = s * 0.18;
 
           for (let o = 0; o < i.total; o++) {
             const a = document.createElement("span");
@@ -3271,7 +3269,7 @@
         const { speed: t, letters: e, animationProgress: i } = this;
         e.forEach((s, sIdx) => {
           const n = t * s.freq;
-          const phaseOffset = sIdx * 0.16;
+          const phaseOffset = sIdx * 0.18;
           s.ghosts.forEach((o, a) => {
             const l = (((i % n) / n + (a / s.total) + phaseOffset) % 1) / 0.7 - 0.15;
             o.el.style.setProperty("--progress", String(l));
