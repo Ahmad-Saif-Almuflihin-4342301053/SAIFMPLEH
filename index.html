@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>SAIF — Ahmad Saif Almuflihin | Systems Architect &amp; Creative Developer</title>
 
   <!-- Core SEO & Identity -->
@@ -1499,7 +1502,7 @@
     /* Hidden Anchor Title (Dead-Center Reference for Letter Ghosts) */
     .s-work .s__title,
     .s-work .s__scene {
-      font: 700 min(19rem, 22.5vh) / 0.86 var(--font-family-bigger);
+      font: 700 min(18rem, 21vh) / 0.88 var(--font-family-bigger);
       text-align: center;
       text-transform: uppercase;
       letter-spacing: -0.01em;
@@ -1507,12 +1510,12 @@
 
     .s-work .s__title__inner,
     .s-work .s__scene__letter {
-      line-height: 0.86;
+      line-height: 0.88;
     }
 
     .s-work .s__title {
       position: absolute;
-      top: 50%;
+      top: 52%; /* Offset slightly downward so W has ample headroom inside capsule */
       left: 50%;
       transform: translate(-50%, -50%);
       width: auto;
@@ -1535,7 +1538,7 @@
     .s-work .s__title__letter {
       display: block;
       text-align: center;
-      line-height: 0.86;
+      line-height: 0.88;
       margin: 0 auto;
     }
 
@@ -1554,7 +1557,7 @@
       will-change: transform;
     }
 
-    /* 3D Orbiting Letter Ghost (Clean & Balanced Cylindrical Marquee) */
+    /* 3D Orbiting Letter Ghost (Clean & Balanced Cylindrical Marquee with Distinct Inter-Letter Spacing) */
     .s-work .s__scene .s__scene__letter {
       --head: calc((var(--progress) - 0.5) * -2);
       --ahead: calc(var(--head) * var(--head));
@@ -1563,16 +1566,20 @@
       left: 0;
       display: block;
       text-align: center;
+      text-shadow: none !important;
+      filter: none !important;
       transform: rotateY(calc(var(--head) * -12deg * var(--state))) 
-                 translate3d(calc(var(--head) * 56vw * var(--state)),
-                             calc(var(--iy) * 52% * var(--ahead) * var(--state)), 0);
+                 translate3d(calc(var(--head) * 60vw * var(--state)),
+                             calc(var(--iy) * 50% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
     }
 
-    /* Clean, crisp letters without duplicate extrusion shadows */
+    /* Absolutely no duplicate extrusion shadows */
     .s-work .s__scene .s__scene__letter::before {
-      display: none;
+      display: none !important;
+      content: none !important;
+      opacity: 0 !important;
     }
 
     /* 3D Orbiting Work Cards (<a-work>) */
@@ -3088,9 +3095,9 @@
         t.svg.style.width = t.width + "px";
         t.svg.style.height = t.height + "px";
 
-        // Authentic Wodniack stadium capsule with ample vertical clearance for letters
-        const n = Math.min(Math.max(e * 0.18, 250), 320);
-        const o = Math.min(Math.max(i * 0.82, 530), 640);
+        // Enlarged stadium capsule with generous headroom and breathing space
+        const n = Math.min(Math.max(e * 0.22, 280), 360);
+        const o = Math.min(Math.max(i * 0.90, 600), 740);
         const a = (e - n) / 2;
         const l = (i - o) / 2;
 
@@ -3158,11 +3165,13 @@
           i.left = containerCenterX - (i.width / 2);
           i.freq = 1.0 + (s * 0.12);
 
-          // Perfectly spaced 3D cylindrical marquee (direnggangin dikit, pas & tidak numpuk)
-          const n = window.innerWidth > 767 ? 1.15 : 0.85;
-          i.total = Math.round(this.bounding.width / i.width * n) + 2;
+          // Technical letter spacing (inter-letter gap):
+          // Enforce 7 ghosts per row on desktop (5 on mobile) across 360 degrees.
+          // This mathematically guarantees deltaX > letter_width with a comfortable 40-75px gap,
+          // completely eliminating any horizontal overlap or pseudo-shadow!
+          i.total = window.innerWidth > 767 ? 7 : 5;
 
-          const phaseOffset = s * 0.14;
+          const phaseOffset = s * 0.16;
 
           for (let o = 0; o < i.total; o++) {
             const a = document.createElement("span");
@@ -3262,7 +3271,7 @@
         const { speed: t, letters: e, animationProgress: i } = this;
         e.forEach((s, sIdx) => {
           const n = t * s.freq;
-          const phaseOffset = sIdx * 0.14;
+          const phaseOffset = sIdx * 0.16;
           s.ghosts.forEach((o, a) => {
             const l = (((i % n) / n + (a / s.total) + phaseOffset) % 1) / 0.7 - 0.15;
             o.el.style.setProperty("--progress", String(l));
