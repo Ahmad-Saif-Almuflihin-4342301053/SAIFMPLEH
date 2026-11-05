@@ -1557,7 +1557,7 @@
       will-change: transform;
     }
 
-    /* 3D Orbiting Letter Ghost (Authentic Wodniack Cylindrical Marquee) */
+    /* 3D Orbiting Letter Ghost (Subtle & Elegant Cylindrical Marquee matching Wodniack) */
     .s-work .s__scene .s__scene__letter {
       --head: calc((var(--progress) - 0.5) * -2);
       --ahead: calc(var(--head) * var(--head));
@@ -1568,7 +1568,7 @@
       text-align: center;
       transform: rotateY(calc(var(--head) * -10deg * var(--state))) 
                  translate3d(calc(var(--head) * 50vw * var(--state)),
-                             calc(var(--iy) * 50% * var(--ahead) * var(--state)), 0);
+                             calc(var(--iy) * 18% * var(--ahead) * var(--state)), 0);
       pointer-events: none;
       will-change: transform;
     }
@@ -3162,9 +3162,9 @@
           i.left = containerCenterX - (i.width / 2);
           i.freq = 1.0 + (s * 0.12);
 
-          // Authentic dynamic density matching letter width and screen width:
-          // Produces a consistent, clean ~20-25px gap between letters without collision
-          const density = window.innerWidth > 767 ? 1.05 : 0.75;
+          // Exact Wodniack letter spacing & ghost count:
+          // Produces ~8-9 letters for W and ~13 letters for O with comfortable ~30-40px breathing gap
+          const density = window.innerWidth > 767 ? 0.72 : 0.48;
           i.total = Math.round((this.bounding.width / i.width) * density) + 2;
 
           for (let o = 0; o < i.total; o++) {
